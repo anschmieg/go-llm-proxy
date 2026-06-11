@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -21,6 +23,45 @@ func TestValidateConfig_Valid(t *testing.T) {
 	cfg := validConfig()
 	if err := validateConfig(cfg); err != nil {
 		t.Fatalf("expected no error, got: %v", err)
+	}
+}
+
+func TestConfigStoreLoadExpandsEnvironmentVariables(t *testing.T) {
+	t.Setenv("GO_LLM_PROXY_TEST_BACKEND_KEY", "backend-secret")
+	t.Setenv("GO_LLM_PROXY_TEST_CLIENT_KEY", "client-secret")
+	t.Setenv("GO_LLM_PROXY_TEST_DASHBOARD_PASSWORD", "dashboard-secret")
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	content := `listen: ":8080"
+log_metrics: true
+usage_dashboard: true
+usage_dashboard_password: ${GO_LLM_PROXY_TEST_DASHBOARD_PASSWORD}
+models:
+  - name: test-model
+    backend: http://localhost:8000/v1
+    api_key: ${GO_LLM_PROXY_TEST_BACKEND_KEY}
+keys:
+  - key: ${GO_LLM_PROXY_TEST_CLIENT_KEY}
+    name: admin
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+
+	cs, err := NewConfigStore(path)
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	cfg := cs.Get()
+	if got := cfg.Models[0].APIKey; got != "backend-secret" {
+		t.Fatalf("model api key not expanded: %q", got)
+	}
+	if got := cfg.Keys[0].Key; got != "client-secret" {
+		t.Fatalf("client key not expanded: %q", got)
+	}
+	if got := cfg.UsageDashboardPassword; got != "dashboard-secret" {
+		t.Fatalf("dashboard password not expanded: %q", got)
 	}
 }
 

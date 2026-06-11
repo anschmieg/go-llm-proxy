@@ -147,8 +147,14 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("reading config: %w", err)
 	}
 
+	// Expand ${ENV_VAR} references before parsing so secrets can live in
+	// deployment environment variables instead of the config file.
+	// Undefined variables expand to an empty string, which then flows through
+	// normal config validation (e.g. dashboard password required when enabled).
+	expanded := os.ExpandEnv(string(data))
+
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	if err := yaml.Unmarshal([]byte(expanded), &cfg); err != nil {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
