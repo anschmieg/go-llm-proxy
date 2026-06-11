@@ -1,0 +1,31 @@
+# Example template for startup/deploy-time model generation.
+# Copy to /config/config.template.yaml on the Coolify host, fill static keys via env vars,
+# and the container entrypoint will write /config/config.yaml at startup.
+
+listen: "0.0.0.0:8080"
+serve_config_generator: true
+log_metrics: true
+usage_db: /config/usage.db
+usage_dashboard: true
+usage_dashboard_password: ${DASHBOARD_PASSWORD}
+
+models:
+  # Static/local models can stay here.
+  # - name: local-model
+  #   backend: http://host.docker.internal:8000/v1
+
+  # Generated provider models are inserted below on container startup.
+  # BEGIN DYNAMIC MODELS
+  # END DYNAMIC MODELS
+
+keys:
+  - key: ${ADMIN_API_KEY}
+    name: admin
+    # models omitted = all generated/static models
+
+processors:
+  # Set these to generated model names after first generation if desired, e.g.
+  # vision: openrouter/google/gemini-2.5-flash-image-preview:free
+  vision: ""
+  ocr: ""
+  audio: ""

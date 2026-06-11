@@ -17,11 +17,15 @@ FROM alpine:3.21
 
 RUN addgroup -S app && adduser -S -G app app \
     && apk add --no-cache ca-certificates \
-       poppler-utils
+       poppler-utils \
+       python3
 
 WORKDIR /app
 
 COPY --from=builder /out/go-llm-proxy /usr/local/bin/go-llm-proxy
+COPY scripts/generate-model-config.py /usr/local/bin/generate-model-config
+COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+RUN chmod +x /usr/local/bin/generate-model-config /usr/local/bin/docker-entrypoint
 
 RUN mkdir -p /config && chown app:app /config
 
@@ -29,5 +33,5 @@ USER app
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/local/bin/go-llm-proxy"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
 CMD ["-config", "/config/config.yaml"]

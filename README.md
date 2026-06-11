@@ -52,6 +52,32 @@ keys:
 
 See [config.yaml.example](config.yaml.example) for a fully annotated starter config with all options.
 
+## Startup model config generation
+
+Docker images include a startup generator for provider model lists. If `/config/config.template.yaml` exists, the entrypoint queries provider `/models` endpoints and writes `/config/config.yaml` before starting the proxy. The generator does not carry a full model registry; it materializes models from provider APIs at deploy/startup time.
+
+Use [config.template.yaml.example](config.template.yaml.example) as the mounted template. It must contain these markers under `models:`:
+
+```yaml
+  # BEGIN DYNAMIC MODELS
+  # END DYNAMIC MODELS
+```
+
+Supported provider env vars:
+
+- `OPENROUTER_API_KEY` — queries OpenRouter and includes free and vision/multimodal models.
+- `OLLAMA_API_KEY` — queries Ollama Cloud and includes returned cloud models.
+- `OPENCODE_ZEN_API_KEY` — queries OpenCode Zen and includes free models reported by the endpoint.
+- `DASHBOARD_PASSWORD` — used by the usage/admin dashboard in the example template.
+- `ADMIN_API_KEY` — proxy client key in the example template.
+
+Optional controls:
+
+- `MODEL_CONFIG_PROVIDERS=openrouter,ollama,opencode`
+- `MODEL_CONFIG_MAX_PER_PROVIDER=80`
+- `MODEL_CONFIG_TEMPLATE=/config/config.template.yaml`
+- `MODEL_CONFIG_OUTPUT=/config/config.yaml`
+
 ## Compatibility matrix
 
 What works with each coding assistant through the proxy.
