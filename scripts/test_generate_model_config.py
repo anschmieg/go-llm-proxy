@@ -38,6 +38,8 @@ class OpenCodeEndpointTests(unittest.TestCase):
             "glm-5.1": "chat",
             "kimi-k2": "chat",
             "gemini-3-pro-preview": "gemini",
+            "big-pickle": "chat",
+            "opencode/big-pickle": "chat",
         }
         for model, endpoint in cases.items():
             with self.subTest(model=model):
@@ -49,10 +51,12 @@ class OpenCodeEndpointTests(unittest.TestCase):
             {"id": "gpt-5.1"},
             {"id": "claude-sonnet-4-6"},
             {"id": "deepseek-v4-flash"},
+            {"id": "big-pickle"},
         ])
         self.assertIn('model: "gpt-5.1"\n    type: openai\n    # opencode_zen_endpoint: responses\n    responses_mode: native', yaml)
         self.assertIn('backend: "https://opencode.ai/zen"\n    api_key: ${OPENCODE_ZEN_API_KEY}\n    model: "claude-sonnet-4-6"\n    type: anthropic\n    # opencode_zen_endpoint: messages\n    messages_mode: native', yaml)
-        self.assertIn('model: "deepseek-v4-flash"\n    type: openai\n    # opencode_zen_endpoint: chat', yaml)
+        self.assertIn('model: "deepseek-v4-flash"\n    type: openai\n    # opencode_zen_endpoint: chat\n    responses_mode: translate', yaml)
+        self.assertIn('model: "big-pickle"\n    type: openai\n    # opencode_zen_endpoint: chat\n    responses_mode: translate', yaml)
 
 
 if __name__ == "__main__":

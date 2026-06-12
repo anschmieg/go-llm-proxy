@@ -270,8 +270,15 @@ def generated_yaml(provider: Provider, items: list[Any]) -> str:
                 lines.append("    responses_mode: native")
             elif endpoint == "messages":
                 lines.append("    messages_mode: native")
+            elif endpoint == "chat":
+                # Some OpenCode Zen chat models (notably big-pickle) expose a
+                # /responses route that returns a model/format error. Force
+                # Responses API clients (Codex) through our Responses->Chat
+                # translator so upstream receives /v1/chat/completions.
+                lines.append("    responses_mode: translate")
             elif endpoint == "gemini":
                 lines.append("    # Gemini uses /v1/models/{model}:generateContent upstream; keep as chat until native Gemini translation is enabled.")
+                lines.append("    responses_mode: translate")
         cw = context_window(item)
         if cw:
             lines.append(f"    context_window: {cw}")

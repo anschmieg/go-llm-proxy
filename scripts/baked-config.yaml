@@ -53,22 +53,21 @@ models:
   - name: "modal/glm-5.1"
     backend: "https://api.us-west-2.modal.direct/v1"
     api_key: "${MODAL_API_KEY}"
-    model: "glm-5.1"
+    model: "zai-org/GLM-5.1-FP8"
     type: openai
-    supports_vision: true
 
-  - name: "modal/glm-5.1-32k"
+  - name: "modal/zai-org/GLM-5.1-FP8"
     backend: "https://api.us-west-2.modal.direct/v1"
     api_key: "${MODAL_API_KEY}"
-    model: "glm-5.1-32k"
+    model: "zai-org/GLM-5.1-FP8"
     type: openai
-    supports_vision: true
 
   - name: "opencode-zen/big-pickle"
     backend: "https://opencode.ai/zen/v1"
     api_key: "${OPENCODE_ZEN_API_KEY}"
     model: "big-pickle"
     type: openai
+    responses_mode: translate
 
   - name: "opencode-zen/mimo-2.5"
     backend: "https://opencode.ai/zen/v1"
