@@ -1,11 +1,14 @@
 #!/bin/sh
 set -eu
 
-BAKED="/usr/local/share/go-llm-proxy/config.yaml"
-OUTPUT="/config/config.yaml"
+TEMPLATE="${MODEL_CONFIG_TEMPLATE:-/config/config.template.yaml}"
+OUTPUT="${MODEL_CONFIG_OUTPUT:-/config/config.yaml}"
 
-# Remove any stale config first, then copy the baked version.
-rm -f "$OUTPUT"
-cp "$BAKED" "$OUTPUT"
+# Generate dynamic config from template (expands env vars, queries model APIs).
+# The /config volume is 0777 so the app user can write config.yaml.
+if [ -f "$TEMPLATE" ]; then
+  echo "generating model config from $TEMPLATE -> $OUTPUT" >&2
+  /usr/local/bin/generate-model-config --template "$TEMPLATE" --output "$OUTPUT"
+fi
 
 exec /usr/local/bin/go-llm-proxy "$@"
