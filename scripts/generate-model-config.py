@@ -229,7 +229,7 @@ def opencode_model_endpoint(model: str) -> str:
         return "messages"
     if re.match(r"^gemini-", normalized):
         return "gemini"
-    if re.match(r"^(deepseek-|minimax-|glm-|kimi-|grok-|big-pickle$|mimo-|north-|nemotron-)", normalized):
+    if re.match(r"^(deepseek-|minimax-|glm-|kimi-|grok-|big-pickle|mimo-|north-|nemotron-)", normalized):
         return "chat"
     return "chat"
 
