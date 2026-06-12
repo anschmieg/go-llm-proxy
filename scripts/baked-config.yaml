@@ -6,6 +6,7 @@ usage_dashboard: true
 usage_dashboard_password: ${DASHBOARD_PASSWORD}
 
 models:
+  # Static models preserved outside the dynamic block
   - name: "openrouter/qwen/qwen-2.5-coder-32b-instruct"
     backend: "https://openrouter.ai/api/v1"
     api_key: ${OPENROUTER_API_KEY}
@@ -76,13 +77,13 @@ models:
     type: openai
 
   - name: "ollama/qwen2.5-coder"
-    backend: "https://ollama.com/v1"
+    backend: "https://api.ollama.cloud/v1"
     api_key: ${OLLAMA_API_KEY}
     model: "qwen2.5-coder"
     type: openai
 
   - name: "ollama/llama3.3-70b"
-    backend: "https://ollama.com/v1"
+    backend: "https://api.ollama.cloud/v1"
     api_key: ${OLLAMA_API_KEY}
     model: "llama3.3-70b"
     type: openai
@@ -91,7 +92,7 @@ models:
   # END DYNAMIC MODELS
 
 keys:
-  - key: ${ADMIN_API_KEY}
+  - key: glm-zv5rKP9TqJw3nX8yHm4bFc2pLs7DkA0R
     name: admin
 
 processors:
