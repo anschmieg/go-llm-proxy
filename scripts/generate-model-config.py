@@ -192,12 +192,35 @@ def normalize_model_list(payload: Any) -> list[Any]:
     return []
 
 
+# Exact endpoint map from https://opencode.ai/docs/zen/#endpoints.
+# Use this before family regexes: Zen has exceptions, and the /models payload
+# does not currently advertise the correct endpoint per model.
+OPENCODE_ENDPOINT_OVERRIDES = {
+    "big-pickle": "chat",
+    "mimo-v2.5-free": "chat",
+    "north-mini-code-free": "chat",
+    "nemotron-3-ultra-free": "chat",
+    "deepseek-v4-flash-free": "chat",
+}
+
+OPENCODE_EXCLUDED_MODELS = {
+    # Still appears in /models as free, but docs no longer list it and upstream
+    # returns: "Free promotion has ended for MiniMax M3 Free".
+    "minimax-m3-free",
+    # Still appears in /models but is absent from the Zen endpoint docs. Do not
+    # expose until OpenCode documents it or an endpoint is verified stable.
+    "qwen3.6-plus-free",
+}
+
+
 def select_models(provider: Provider, items: list[Any], max_count: int) -> list[Any]:
     selected: list[Any] = []
     seen: set[str] = set()
     for item in items:
         mid = model_id(item)
         if not mid or mid in seen:
+            continue
+        if provider.key == "opencode" and mid in OPENCODE_EXCLUDED_MODELS:
             continue
         if provider.include_all:
             keep = True
@@ -223,6 +246,8 @@ def opencode_model_endpoint(model: str) -> str:
     route by stable model-family prefixes.
     """
     normalized = (model or "").strip().lower().rsplit("/", 1)[-1]
+    if normalized in OPENCODE_ENDPOINT_OVERRIDES:
+        return OPENCODE_ENDPOINT_OVERRIDES[normalized]
     if re.match(r"^gpt-", normalized):
         return "responses"
     if re.match(r"^(claude-|qwen)", normalized):

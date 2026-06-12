@@ -40,10 +40,23 @@ class OpenCodeEndpointTests(unittest.TestCase):
             "gemini-3-pro-preview": "gemini",
             "big-pickle": "chat",
             "opencode/big-pickle": "chat",
+            "deepseek-v4-flash-free": "chat",
+            "mimo-v2.5-free": "chat",
+            "north-mini-code-free": "chat",
+            "nemotron-3-ultra-free": "chat",
         }
         for model, endpoint in cases.items():
             with self.subTest(model=model):
                 self.assertEqual(gen.opencode_model_endpoint(model), endpoint)
+
+    def test_opencode_excludes_stale_free_models(self):
+        provider = gen.PROVIDERS["opencode"]
+        selected = gen.select_models(provider, [
+            {"id": "deepseek-v4-flash-free"},
+            {"id": "qwen3.6-plus-free"},
+            {"id": "minimax-m3-free"},
+        ], 10)
+        self.assertEqual([m["id"] for m in selected], ["deepseek-v4-flash-free"])
 
     def test_generated_yaml_sets_opencode_backend_and_modes(self):
         provider = gen.PROVIDERS["opencode"]

@@ -69,12 +69,6 @@ models:
     type: openai
     responses_mode: translate
 
-  - name: "opencode-zen/mimo-2.5"
-    backend: "https://opencode.ai/zen/v1"
-    api_key: "${OPENCODE_ZEN_API_KEY}"
-    model: "mimo-2.5"
-    type: openai
-
   - name: "ollama/qwen2.5-coder"
     backend: "https://api.ollama.cloud/v1"
     api_key: "${OLLAMA_API_KEY}"
