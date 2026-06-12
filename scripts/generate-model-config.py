@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -127,27 +128,43 @@ def is_free_model(item: Any) -> bool:
     return False
 
 
-def is_vision_model(item: Any) -> bool:
+def _collect_strings(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(v).strip().lower() for v in value if str(v).strip()]
+    if isinstance(value, str) and value.strip():
+        return [value.strip().lower()]
+    return []
+
+
+def input_modalities(item: Any) -> set[str]:
+    """Return structured input modalities from provider metadata.
+
+    Vision support for this proxy means one request can contain both text and
+    image parts.  Do not infer that from descriptions or generic attachment
+    flags: those can mean image-only generation, document upload, or marketing
+    text rather than chat-style multimodal input.
+    """
     if not isinstance(item, dict):
-        return False
-    haystack: list[str] = []
-    for key in ("input_modalities", "output_modalities", "modalities"):
-        val = item.get(key)
-        if isinstance(val, list):
-            haystack.extend(str(v) for v in val)
-        elif val is not None:
-            haystack.append(str(val))
+        return set()
+    mods: list[str] = []
+    mods.extend(_collect_strings(item.get("input_modalities")))
+
+    modalities = item.get("modalities")
+    if isinstance(modalities, dict):
+        mods.extend(_collect_strings(modalities.get("input")))
+    else:
+        mods.extend(_collect_strings(modalities))
+
     arch = item.get("architecture") or {}
     if isinstance(arch, dict):
-        for key in ("input_modalities", "modality", "instruct_type"):
-            val = arch.get(key)
-            if isinstance(val, list):
-                haystack.extend(str(v) for v in val)
-            elif val is not None:
-                haystack.append(str(val))
-    haystack.append(str(item.get("description") or ""))
-    text = " ".join(haystack).lower()
-    return "image" in text or "vision" in text or "multimodal" in text
+        mods.extend(_collect_strings(arch.get("input_modalities")))
+
+    return set(mods)
+
+
+def is_vision_model(item: Any) -> bool:
+    mods = input_modalities(item)
+    return "text" in mods and "image" in mods
 
 
 def context_window(item: Any) -> int | None:
@@ -198,6 +215,34 @@ def yaml_quote(value: str) -> str:
     return json.dumps(value)
 
 
+def opencode_model_endpoint(model: str) -> str:
+    """Return OpenCode Zen endpoint family for a model id.
+
+    OpenCode Zen exposes multiple protocol surfaces on one base service.  The
+    `/models` payload currently doesn't advertise the endpoint per model, so we
+    route by stable model-family prefixes.
+    """
+    normalized = (model or "").strip().lower().rsplit("/", 1)[-1]
+    if re.match(r"^gpt-", normalized):
+        return "responses"
+    if re.match(r"^(claude-|qwen)", normalized):
+        return "messages"
+    if re.match(r"^gemini-", normalized):
+        return "gemini"
+    if re.match(r"^(deepseek-|minimax-|glm-|kimi-|grok-|big-pickle$|mimo-|north-|nemotron-)", normalized):
+        return "chat"
+    return "chat"
+
+
+def opencode_generated_backend_and_type(provider: Provider, model: str) -> tuple[str, str, str]:
+    """Return (backend, backend_type, endpoint_family) for generated OpenCode models."""
+    endpoint = opencode_model_endpoint(model)
+    if endpoint == "messages":
+        # Native Anthropic Messages appends /v1/messages itself, so drop /v1.
+        return provider.backend.removesuffix("/v1"), "anthropic", endpoint
+    return provider.backend, "openai", endpoint
+
+
 def generated_yaml(provider: Provider, items: list[Any]) -> str:
     lines: list[str] = []
     if not items:
@@ -209,11 +254,24 @@ def generated_yaml(provider: Provider, items: list[Any]) -> str:
         if not mid:
             continue
         public_name = f"{provider.key}/{mid}"
+        backend = provider.backend
+        backend_type = "openai"
+        endpoint = "chat"
+        if provider.key == "opencode":
+            backend, backend_type, endpoint = opencode_generated_backend_and_type(provider, mid)
         lines.append(f"  - name: {yaml_quote(public_name)}")
-        lines.append(f"    backend: {yaml_quote(provider.backend)}")
+        lines.append(f"    backend: {yaml_quote(backend)}")
         lines.append(f"    api_key: ${{{provider.env_key}}}")
         lines.append(f"    model: {yaml_quote(mid)}")
-        lines.append("    type: openai")
+        lines.append(f"    type: {backend_type}")
+        if provider.key == "opencode":
+            lines.append(f"    # opencode_zen_endpoint: {endpoint}")
+            if endpoint == "responses":
+                lines.append("    responses_mode: native")
+            elif endpoint == "messages":
+                lines.append("    messages_mode: native")
+            elif endpoint == "gemini":
+                lines.append("    # Gemini uses /v1/models/{model}:generateContent upstream; keep as chat until native Gemini translation is enabled.")
         cw = context_window(item)
         if cw:
             lines.append(f"    context_window: {cw}")
