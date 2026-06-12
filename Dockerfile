@@ -34,5 +34,5 @@ USER app
 
 EXPOSE 8080
 
-ENTRYPOINT []
-CMD ["/usr/local/bin/go-llm-proxy", "-config", "/usr/local/share/go-llm-proxy/config.yaml"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
+CMD ["-config", "/config/config.yaml"]
