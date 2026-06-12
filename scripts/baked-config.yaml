@@ -92,7 +92,7 @@ models:
   # END DYNAMIC MODELS
 
 keys:
-  - key: glm-zv5rKP9TqJw3nX8yHm4bFc2pLs7DkA0R
+  - key: ${ADMIN_API_KEY}
     name: admin
 
 processors:

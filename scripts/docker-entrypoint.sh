@@ -1,11 +1,10 @@
 #!/bin/sh
 set -eu
 
-TEMPLATE="${MODEL_CONFIG_TEMPLATE:-/config/config.template.yaml}"
-OUTPUT="${MODEL_CONFIG_OUTPUT:-/config/config.yaml}"
+TEMPLATE="${MODEL_CONFIG_TEMPLATE:-/app/config/config.template.yaml}"
+OUTPUT="${MODEL_CONFIG_OUTPUT:-/app/config/config.yaml}"
 
 # Generate dynamic config from template (expands env vars, queries model APIs).
-# The /config volume is 0777 so the app user can write config.yaml.
 if [ -f "$TEMPLATE" ]; then
   echo "generating model config from $TEMPLATE -> $OUTPUT" >&2
   /usr/local/bin/generate-model-config --template "$TEMPLATE" --output "$OUTPUT"
