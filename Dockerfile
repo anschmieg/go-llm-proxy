@@ -25,14 +25,14 @@ WORKDIR /app
 COPY --from=builder /out/go-llm-proxy /usr/local/bin/go-llm-proxy
 COPY scripts/generate-model-config.py /usr/local/bin/generate-model-config
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-COPY scripts/baked-config.yaml /app/config/config.template.yaml
+COPY scripts/baked-config.yaml /usr/local/share/go-llm-proxy/config.template.yaml
 RUN chmod +x /usr/local/bin/generate-model-config /usr/local/bin/docker-entrypoint
 
-RUN mkdir -p /config /app/config && chown -R app:app /config /app/config
+RUN mkdir -p /config && chown app:app /config
 
 USER app
 
 EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
-CMD ["-config", "/app/config/config.yaml"]
+CMD ["-config", "/tmp/go-llm-proxy-config.yaml"]

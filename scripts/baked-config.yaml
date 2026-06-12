@@ -1,90 +1,90 @@
 listen: "0.0.0.0:8080"
 serve_config_generator: true
 log_metrics: true
-usage_db: /config/usage.db
-usage_dashboard: true
-usage_dashboard_password: ${DASHBOARD_PASSWORD}
+usage_db: /tmp/usage.db
+usage_dashboard: false
+usage_dashboard_password: "${DASHBOARD_PASSWORD}"
 
 models:
   # Static models preserved outside the dynamic block
   - name: "openrouter/qwen/qwen-2.5-coder-32b-instruct"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "qwen/qwen-2.5-coder-32b-instruct"
     type: openai
 
   - name: "openrouter/google/gemini-2.5-pro-exp-03-25"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "google/gemini-2.5-pro-exp-03-25"
     type: openai
 
   - name: "openrouter/qwen/qwen-vl-plus"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "qwen/qwen-vl-plus"
     type: openai
     supports_vision: true
 
   - name: "openrouter/minimax/minimax-m2.7"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "minimax/minimax-m2.7"
     type: openai
 
   - name: "openrouter/anthropic/claude-sonnet-4"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "anthropic/claude-sonnet-4"
     type: openai
 
   - name: "openrouter/deepseek/deepseek-chat"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "deepseek/deepseek-chat"
     type: openai
 
   - name: "openrouter/google/gemini-2.0-flash-001"
     backend: "https://openrouter.ai/api/v1"
-    api_key: ${OPENROUTER_API_KEY}
+    api_key: "${OPENROUTER_API_KEY}"
     model: "google/gemini-2.0-flash-001"
     type: openai
 
   - name: "modal/glm-5.1"
     backend: "https://api.us-west-2.modal.direct/v1"
-    api_key: ${MODAL_API_KEY}
+    api_key: "${MODAL_API_KEY}"
     model: "glm-5.1"
     type: openai
     supports_vision: true
 
   - name: "modal/glm-5.1-32k"
     backend: "https://api.us-west-2.modal.direct/v1"
-    api_key: ${MODAL_API_KEY}
+    api_key: "${MODAL_API_KEY}"
     model: "glm-5.1-32k"
     type: openai
     supports_vision: true
 
   - name: "opencode-zen/big-pickle"
     backend: "https://opencode.ai/zen/v1"
-    api_key: ${OPENCODE_ZEN_API_KEY}
+    api_key: "${OPENCODE_ZEN_API_KEY}"
     model: "big-pickle"
     type: openai
 
   - name: "opencode-zen/mimo-2.5"
     backend: "https://opencode.ai/zen/v1"
-    api_key: ${OPENCODE_ZEN_API_KEY}
+    api_key: "${OPENCODE_ZEN_API_KEY}"
     model: "mimo-2.5"
     type: openai
 
   - name: "ollama/qwen2.5-coder"
     backend: "https://api.ollama.cloud/v1"
-    api_key: ${OLLAMA_API_KEY}
+    api_key: "${OLLAMA_API_KEY}"
     model: "qwen2.5-coder"
     type: openai
 
   - name: "ollama/llama3.3-70b"
     backend: "https://api.ollama.cloud/v1"
-    api_key: ${OLLAMA_API_KEY}
+    api_key: "${OLLAMA_API_KEY}"
     model: "llama3.3-70b"
     type: openai
 
@@ -92,7 +92,7 @@ models:
   # END DYNAMIC MODELS
 
 keys:
-  - key: ${ADMIN_API_KEY}
+  - key: "${ADMIN_API_KEY}"
     name: admin
 
 processors:

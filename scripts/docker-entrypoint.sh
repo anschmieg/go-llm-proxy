@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 
-TEMPLATE="${MODEL_CONFIG_TEMPLATE:-/app/config/config.template.yaml}"
-OUTPUT="${MODEL_CONFIG_OUTPUT:-/app/config/config.yaml}"
+TEMPLATE="${MODEL_CONFIG_TEMPLATE:-/usr/local/share/go-llm-proxy/config.template.yaml}"
+OUTPUT="${MODEL_CONFIG_OUTPUT:-/tmp/go-llm-proxy-config.yaml}"
 
 # Generate dynamic config from template (expands env vars, queries model APIs).
 if [ -f "$TEMPLATE" ]; then
