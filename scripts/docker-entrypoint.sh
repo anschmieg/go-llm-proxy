@@ -12,12 +12,8 @@ OUTPUT="${MODEL_CONFIG_OUTPUT:-/config/config.yaml}"
 # MODEL_CONFIG_TEMPLATE and set MODEL_CONFIG_PROVIDERS.
 
 if [ -f "$BAKED" ]; then
-  if [ -f "$OUTPUT" ] && cmp -s "$OUTPUT" "$BAKED" 2>/dev/null; then
-    echo "baked config already in place at $OUTPUT" >&2
-  else
-    echo "copying baked fallback config to $OUTPUT" >&2
-    cp "$BAKED" "$OUTPUT"
-  fi
+  echo "copying baked fallback config to $OUTPUT" >&2
+  cp -f "$BAKED" "$OUTPUT"
 else
   echo "fatal: no baked fallback config at $BAKED" >&2
   exit 1
