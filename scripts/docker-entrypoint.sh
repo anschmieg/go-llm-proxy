@@ -4,8 +4,8 @@ set -eu
 BAKED="/usr/local/share/go-llm-proxy/config.yaml"
 OUTPUT="/config/config.yaml"
 
-# Copy baked config from image to OUTPUT. Use -f to force overwrite the
-# stale root-owned file from the initial volume setup.
-cp -f "$BAKED" "$OUTPUT"
+# Remove any stale config first, then copy the baked version.
+rm -f "$OUTPUT"
+cp "$BAKED" "$OUTPUT"
 
 exec /usr/local/bin/go-llm-proxy "$@"
