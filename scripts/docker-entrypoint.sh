@@ -1,23 +1,26 @@
 #!/bin/sh
 set -eu
 
-TEMPLATE="${MODEL_CONFIG_TEMPLATE:-/config/config.template.yaml}"
-OUTPUT="${MODEL_CONFIG_OUTPUT:-/config/config.yaml}"
 BAKED="/usr/local/share/go-llm-proxy/config.yaml"
+OUTPUT="${MODEL_CONFIG_OUTPUT:-/config/config.yaml}"
 
-if [ -f "$TEMPLATE" ]; then
-  echo "generating model config from $TEMPLATE -> $OUTPUT" >&2
-  /usr/local/bin/generate-model-config --template "$TEMPLATE" --output "$OUTPUT"
-fi
+# Use the baked config from the image. It uses ${VAR} env-var references
+# that the Go binary resolves at runtime.  The volume may have stale files
+# from a previous deployment, so we always overwrite with the baked config.
+#
+# If you want dynamic model generation, mount a config.template.yaml at
+# MODEL_CONFIG_TEMPLATE and set MODEL_CONFIG_PROVIDERS.
 
-if [ ! -f "$OUTPUT" ]; then
-  if [ -f "$BAKED" ]; then
-    echo "no config found at $OUTPUT; copying baked config from $BAKED" >&2
-    cp "$BAKED" "$OUTPUT"
+if [ -f "$BAKED" ]; then
+  if [ -f "$OUTPUT" ] && cmp -s "$OUTPUT" "$BAKED" 2>/dev/null; then
+    echo "baked config already in place at $OUTPUT" >&2
   else
-    echo "fatal: no config at $OUTPUT and no baked fallback at $BAKED" >&2
-    exit 1
+    echo "copying baked fallback config to $OUTPUT" >&2
+    cp "$BAKED" "$OUTPUT"
   fi
+else
+  echo "fatal: no baked fallback config at $BAKED" >&2
+  exit 1
 fi
 
 exec /usr/local/bin/go-llm-proxy "$@"
